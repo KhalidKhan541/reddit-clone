@@ -1,0 +1,50 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+
+model User {
+  id            String    @id @default(cuid())
+  username      String    @unique
+  karma         Int       @default(0)
+  createdAt     DateTime  @default(now())
+  posts         Post[]
+  comments      Comment[]
+}
+
+model Subreddit {
+  id            String    @id @default(cuid())
+  name          String    @unique
+  description   String?
+  members       Int       @default(0)
+  createdAt     DateTime  @default(now())
+  posts         Post[]
+}
+
+model Post {
+  id            String    @id @default(cuid())
+  title         String
+  content       String?
+  image         String?
+  url           String?
+  type          String    @default("text")
+  upvotes       Int       @default(0)
+  downvotes     Int       @default(0)
+  commentCount  Int       @default(0)
+  authorId      String
+  subredditId   String
+  createdAt     DateTime  @default(now())
+  author        User      @relation(fields: [authorId], references: [id])
+  subreddit     Subreddit @relation(fields: [subredditId], references: [id])
+  comments      Comment[]
+}
+
+model Comment {
+  id            String    @id @default(cuid())
+  content       String
+  upvotes       Int       @default(0)
+  authorId      String
+  postId        String
+  parentId      String?
+  createdAt     DateTime  @default(now())
+  author        User      @relation(fields: [authorId], references: [id])
+  post          Post      @relation(fields: [postId], references: [id])
+}
